@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: ogrenci_takip_db
+    restart: always
+    environment:
+      POSTGRES_USER: gulden
+      POSTGRES_PASSWORD: gulden
+      POSTGRES_DB: ogrenci_takip_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: ogrenci_db_gui
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

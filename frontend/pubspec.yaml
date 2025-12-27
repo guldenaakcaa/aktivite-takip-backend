@@ -1,0 +1,53 @@
+name: frontend
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  http: ^1.6.0
+  fl_chart: ^1.1.1
+  record: ^6.1.2
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
+  audioplayers: ^6.5.1
+  intl: ^0.19.0
+  jwt_decoder: ^2.0.1
+  flutter_native_splash: ^2.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  # BU PAKET EKSİKTİ, EKLEDİM:
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
+# Splash Ekranı Ayarları (Typosu düzeltildi)
+flutter_native_splash:
+  color: "#ffffff"
+  image: "assets/app_icon.png"
+  android_12:
+    image: "assets/app_icon.png"
+    color: "#ffffff"
+  web: false
+
+# ... üst kısımlar aynı ...
+
+# İkon Değiştirme Ayarları (EN GARANTİ YÖNTEM)
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/app_icon.png"
+  macos:
+    generate: true
+    image_path: "assets/app_icon.png"
