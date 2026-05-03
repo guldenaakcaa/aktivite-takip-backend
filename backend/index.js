@@ -363,13 +363,8 @@ app.post('/forgot-password', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-<<<<<<< HEAD
                 user: process.env.EMAIL_ADRES,
                pass: process.env.EMAIL_SIFRE  
-=======
-                user: 'guldenaakcaa@gmail.com', 
-                pass: process.env.EMAIL_SIFRE     
->>>>>>> 53cf52352fe3004aacacce32fe1f3095a1968470
             }
         });
 
@@ -482,7 +477,6 @@ app.delete('/dersler/sil/:ders_id', authMiddleware, async (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 // --- 23. VİDEO DERS EKLE (Sadece Öğretmen) ---
 app.post('/dersler/materyal-ekle', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });
@@ -524,6 +518,3 @@ app.get('/dersler/canli-ders/:ders_id', authMiddleware, async (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Sunucu ${PORT} portunda çalışıyor.`));
-=======
-app.listen(PORT, '0.0.0.0', () => console.log(`Sunucu ${PORT} portunda çalışıyor.`));
->>>>>>> 53cf52352fe3004aacacce32fe1f3095a1968470
