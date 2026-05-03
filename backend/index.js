@@ -327,14 +327,14 @@ app.post('/forgot-password', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'guldenaakcaa@gmail.com', 
+                 user: 'guldenaakcaa@gmail.com', 
                 pass: process.env.EMAIL_SIFRE     
             }
         });
 
         // 5. Mail İçeriği
         const mailOptions = {
-            from: '"Öğrenci Takip Sistemi" <guldenaakcaa@gmail.com>',
+           from: `"Öğrenci Takip Sistemi" <${process.env.EMAIL_ADRES}>`,
             to: email,
             subject: 'Şifre Sıfırlama Kodu',
             text: `Merhaba,\n\nŞifreni sıfırlamak için gereken kodun: ${verificationCode}\n\nBu kod 15 dakika geçerlidir.`
