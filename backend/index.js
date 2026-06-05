@@ -57,7 +57,10 @@ app.post('/kayit', async (req, res) => {
             [ad_soyad, email, hashedPassword, rol]
         );
         res.status(201).json({ mesaj: 'Kayıt başarılı!', kullanici: newUser.rows[0] });
-    } catch (err) { res.status(500).send('Sunucu Hatası'); }
+    } catch (err) {
+        console.error("Kayıt Hatası Detayı:", err);
+        res.status(500).json({ hata: "Sunucu Hatası", detay: err.message });
+    }
 });
 
 // 2. GİRİŞ YAP 
