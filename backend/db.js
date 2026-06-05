@@ -1,12 +1,11 @@
 const { Pool } = require('pg');
+require('dotenv').config(); // Ortam değişkenlerini okuyabilmek için
 
-const pool = new Pool({   // yeni bağlantı havuzu 
-  user: 'guldenakca',      
-  host: 'localhost',
-  database: 'aktivite_takip', 
-  password: '',            
-  port: 5432,
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Supabase dış bağlantıları için zorunlu SSL ayarı
+  }
 });
 
-module.exports = pool;   // dışa aktarıyoruz
-
+module.exports = pool;
