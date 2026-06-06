@@ -71,6 +71,21 @@ router.get('/benim', authMiddleware, async (req, res) => {
     } catch (err) { res.status(500).send('Sunucu Hatası'); }
 });
 
+// yayin
+router.get('/detay/:ders_id', authMiddleware, async (req, res) => {
+    try {
+        const { ders_id } = req.params;
+        const result = await pool.query(
+            'SELECT canli_yayin_aktif, jitsi_oda_linki FROM Dersler WHERE ders_id = $1',
+            [ders_id]
+        );
+
+        if (result.rows.length === 0) return res.status(404).json({ hata: "Ders bulunamadı" });
+
+        res.json(result.rows[0]);
+    } catch (err) { res.status(500).send('Sunucu Hatası'); }
+});
+
 // 21. DERS SİLME (Öğretmen İçin)
 router.delete('/sil/:ders_id', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });  // dersi sadece ogretmen siler
