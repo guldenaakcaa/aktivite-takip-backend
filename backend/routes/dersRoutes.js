@@ -249,6 +249,11 @@ router.post('/gecmis-yayin/ekle', authMiddleware, async (req, res) => {
             'INSERT INTO GecmisYayinlar (ders_id, baslik, link) VALUES ($1, $2, $3) RETURNING *',
             [ders_id, baslik, link]
         );
+
+        await pool.query(
+            'UPDATE Dersler SET canli_yayin_aktif = false, jitsi_oda_linki = NULL WHERE ders_id = $1',
+            [ders_id]
+        );
         res.status(201).json({ mesaj: "Kayıt başarıyla eklendi", kayit: yeniKayit.rows[0] });
     } catch (err) {
         console.error(err.message);
