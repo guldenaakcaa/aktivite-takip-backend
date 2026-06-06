@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('./db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
+const pool = require('../db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
 const authMiddleware = require('../middleware/authMiddleware');
 const crypto = require('crypto');  // idler aynı kaldığı sürece hep aynı karmaşık metni üretecek. 
 // Canlı ders güvenliği için eklendi
