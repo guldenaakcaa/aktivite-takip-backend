@@ -8,8 +8,7 @@ require('dotenv').config();
 
 
 //  3. DERS OLUŞTURMA 
-// router
-app.post('/dersler/olustur', authMiddleware, async (req, res) => { // authMiddleware kişinin tokene güvenli ise bu işlemi yapar
+router.post('/dersler/olustur', authMiddleware, async (req, res) => { // authMiddleware kişinin tokene güvenli ise bu işlemi yapar
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });
     try {
         const { ders_adi, aciklama } = req.body;
@@ -32,7 +31,7 @@ app.post('/dersler/olustur', authMiddleware, async (req, res) => { // authMiddle
 });
 
 // 4. TÜM DERSLERİ LİSTELE 
-app.get('/dersler/tum', authMiddleware, async (req, res) => {
+router.get('/dersler/tum', authMiddleware, async (req, res) => {
     try {
         const rows = await pool.query(`SELECT d.ders_id, d.ders_adi, d.aciklama, k.ad_soyad as ogretmen_adi 
             FROM Dersler d JOIN Kullanicilar k ON d.ogretmen_id = k.kullanici_id`);
@@ -41,7 +40,7 @@ app.get('/dersler/tum', authMiddleware, async (req, res) => {
 });
 
 // 5. DERSE KAYIT OL 
-app.post('/dersler/kayit', authMiddleware, async (req, res) => {
+router.post('/dersler/kayit', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogrenci') return res.status(403).json({ hata: 'Sadece öğrenciler.' });
     try {
         const { ders_id } = req.body;
@@ -56,7 +55,7 @@ app.post('/dersler/kayit', authMiddleware, async (req, res) => {
 });
 
 // 6. BENİM DERSLERİM 
-app.get('/dersler/benim', authMiddleware, async (req, res) => {
+router.get('/dersler/benim', authMiddleware, async (req, res) => {
     try {
         let query;   // kapıdan giren kişinin kim olduğuna göre birazdan değişecek. CONST ta sabitti
         if (req.user.rol === 'ogrenci') {
@@ -73,7 +72,7 @@ app.get('/dersler/benim', authMiddleware, async (req, res) => {
 });
 
 // 21. DERS SİLME (Öğretmen İçin)
-app.delete('/dersler/sil/:ders_id', authMiddleware, async (req, res) => {
+router.delete('/dersler/sil/:ders_id', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });  // dersi sadece ogretmen siler
     try {
         const { ders_id } = req.params;
@@ -101,7 +100,7 @@ app.delete('/dersler/sil/:ders_id', authMiddleware, async (req, res) => {
 });
 
 // --- 22. VİDEO DERS EKLE (Sadece Öğretmen) ---
-app.post('/dersler/materyal-ekle', authMiddleware, async (req, res) => {
+router.post('/dersler/materyal-ekle', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });
     try {
 
@@ -128,7 +127,7 @@ app.post('/dersler/materyal-ekle', authMiddleware, async (req, res) => {
 });
 
 // --- 23. DERS MATERYALLERİNİ GETİR ---
-app.get('/dersler/materyaller/:ders_id', authMiddleware, async (req, res) => {
+router.get('/dersler/materyaller/:ders_id', authMiddleware, async (req, res) => {
     try {
 
         const { ders_id } = req.params;
@@ -170,7 +169,7 @@ app.get('/dersler/materyaller/:ders_id', authMiddleware, async (req, res) => {
 });
 
 // --- 24. CANLI DERS LİNKİ OLUŞTUR / GETİR ---
-app.get('/dersler/canli-ders/:ders_id', authMiddleware, async (req, res) => {
+router.get('/dersler/canli-ders/:ders_id', authMiddleware, async (req, res) => {
     try {
         const { ders_id } = req.params;
         const userId = req.user.id;
@@ -223,7 +222,7 @@ app.get('/dersler/canli-ders/:ders_id', authMiddleware, async (req, res) => {
 });
 
 // 26 Ders kaydını veritabanına ekleyen API
-app.post('/dersler/gecmis-yayin/ekle', authMiddleware, async (req, res) => {
+router.post('/dersler/gecmis-yayin/ekle', authMiddleware, async (req, res) => {
     const { ders_id, baslik, link } = req.body;
     try {
         const yeniKayit = await pool.query(
@@ -238,7 +237,7 @@ app.post('/dersler/gecmis-yayin/ekle', authMiddleware, async (req, res) => {
 });
 
 // 27 Belirli bir dersin geçmiş yayın kayıtlarını getiren API
-app.get('/dersler/gecmis-yayin/:dersId', authMiddleware, async (req, res) => {
+router.get('/dersler/gecmis-yayin/:dersId', authMiddleware, async (req, res) => {
     const { dersId } = req.params;
     try {
         const yayinlar = await pool.query(
