@@ -54,7 +54,7 @@ router.put('/mola/bitir', authMiddleware, async (req, res) => {
 // WHERE mola_id = $1 AND ogrenci_id = $2 burda başka birisi başka bir öğrencinin molasını bitirmesin diye koyduk 
 
 // 9. AKTİVİTE GİRİŞ 
-router.post('/aktivite/giris', authMiddleware, async (req, res) => {
+router.post('/giris', authMiddleware, async (req, res) => {
     try {
         const { ders_id } = req.body;
         await pool.query('UPDATE Aktiviteler SET cikis_zamani = NOW(), toplam_sure = EXTRACT(EPOCH FROM (NOW() - giris_zamani))::INTEGER WHERE ogrenci_id = $1 AND cikis_zamani IS NULL', [req.user.id]);
@@ -77,7 +77,7 @@ router.post('/aktivite/giris', authMiddleware, async (req, res) => {
 });
 
 // 10. AKTİVİTE ÇIKIŞ
-router.post('/aktivite/cikis', authMiddleware, async (req, res) => {
+router.post('/cikis', authMiddleware, async (req, res) => {
     try {
         await pool.query('UPDATE Aktiviteler SET cikis_zamani = NOW(), toplam_sure = EXTRACT(EPOCH FROM (NOW() - giris_zamani))::INTEGER WHERE ogrenci_id = $1 AND cikis_zamani IS NULL', [req.user.id]);
 
@@ -89,7 +89,7 @@ router.post('/aktivite/cikis', authMiddleware, async (req, res) => {
 });
 
 // 15. ÖĞRENCİ AKTİVİTE DURUMU KONTROL 
-router.get('/aktivite/durum/:ders_id', authMiddleware, async (req, res) => {
+router.get('/durum/:ders_id', authMiddleware, async (req, res) => {
     try {
         const { ders_id } = req.params;  // ders.id yi yukarı yazar
         const ogrenci_id = req.user.id;  // öğrenci ıd yı alır 

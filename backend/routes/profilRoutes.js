@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');  // şifre gizleme
 const authMiddleware = require('../middleware/authMiddleware');
 
 // 18. PROFİL: ŞİFRE DEĞİŞTİR (Giriş Yapmış Kullanıcı İçin)
-router.post('/profil/sifre-degistir', authMiddleware, async (req, res) => {
+router.post('/sifre-degistir', authMiddleware, async (req, res) => {
     try {
         const { eski_sifre, yeni_sifre } = req.body;
         const userId = req.user.id;  // doğrudan authMiddleware tarafından onaylanan şifreli token'dan (req.user) okunur.
@@ -29,7 +29,7 @@ router.post('/profil/sifre-degistir', authMiddleware, async (req, res) => {
 
 
 // 19. PROFİL BİLGİLERİNİ GETİR 
-router.get('/profil/bilgi', authMiddleware, async (req, res) => {
+router.get('/bilgi', authMiddleware, async (req, res) => {
     try {
         const user = await pool.query('SELECT ad_soyad, email, rol FROM Kullanicilar WHERE kullanici_id = $1', [req.user.id]);
         // veritabanından herşeyi değil sadece lazım olanları getiriyoruz
@@ -39,7 +39,7 @@ router.get('/profil/bilgi', authMiddleware, async (req, res) => {
 });
 
 // 20. PROFİL BİLGİLERİNİ GÜNCELLE 
-router.put('/profil/guncelle', authMiddleware, async (req, res) => {
+router.put('/guncelle', authMiddleware, async (req, res) => {
     try {
         const { ad_soyad, email } = req.body;
         // Email başkasında var mı kontrol et (kendi emaili hariç)

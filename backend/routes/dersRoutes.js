@@ -8,7 +8,7 @@ require('dotenv').config();
 
 
 //  3. DERS OLUŞTURMA 
-router.post('/dersler/olustur', authMiddleware, async (req, res) => { // authMiddleware kişinin tokene güvenli ise bu işlemi yapar
+router.post('/olustur', authMiddleware, async (req, res) => { // authMiddleware kişinin tokene güvenli ise bu işlemi yapar
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });
     try {
         const { ders_adi, aciklama } = req.body;
@@ -31,7 +31,7 @@ router.post('/dersler/olustur', authMiddleware, async (req, res) => { // authMid
 });
 
 // 4. TÜM DERSLERİ LİSTELE 
-router.get('/dersler/tum', authMiddleware, async (req, res) => {
+router.get('/tum', authMiddleware, async (req, res) => {
     try {
         const rows = await pool.query(`SELECT d.ders_id, d.ders_adi, d.aciklama, k.ad_soyad as ogretmen_adi 
             FROM Dersler d JOIN Kullanicilar k ON d.ogretmen_id = k.kullanici_id`);
@@ -40,7 +40,7 @@ router.get('/dersler/tum', authMiddleware, async (req, res) => {
 });
 
 // 5. DERSE KAYIT OL 
-router.post('/dersler/kayit', authMiddleware, async (req, res) => {
+router.post('/kayit', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogrenci') return res.status(403).json({ hata: 'Sadece öğrenciler.' });
     try {
         const { ders_id } = req.body;
@@ -55,7 +55,7 @@ router.post('/dersler/kayit', authMiddleware, async (req, res) => {
 });
 
 // 6. BENİM DERSLERİM 
-router.get('/dersler/benim', authMiddleware, async (req, res) => {
+router.get('/benim', authMiddleware, async (req, res) => {
     try {
         let query;   // kapıdan giren kişinin kim olduğuna göre birazdan değişecek. CONST ta sabitti
         if (req.user.rol === 'ogrenci') {
@@ -72,7 +72,7 @@ router.get('/dersler/benim', authMiddleware, async (req, res) => {
 });
 
 // 21. DERS SİLME (Öğretmen İçin)
-router.delete('/dersler/sil/:ders_id', authMiddleware, async (req, res) => {
+router.delete('/sil/:ders_id', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });  // dersi sadece ogretmen siler
     try {
         const { ders_id } = req.params;
@@ -100,7 +100,7 @@ router.delete('/dersler/sil/:ders_id', authMiddleware, async (req, res) => {
 });
 
 // --- 22. VİDEO DERS EKLE (Sadece Öğretmen) ---
-router.post('/dersler/materyal-ekle', authMiddleware, async (req, res) => {
+router.post('/materyal-ekle', authMiddleware, async (req, res) => {
     if (req.user.rol !== 'ogretmen') return res.status(403).json({ hata: 'Yetkisiz.' });
     try {
 
@@ -127,7 +127,7 @@ router.post('/dersler/materyal-ekle', authMiddleware, async (req, res) => {
 });
 
 // --- 23. DERS MATERYALLERİNİ GETİR ---
-router.get('/dersler/materyaller/:ders_id', authMiddleware, async (req, res) => {
+router.get('/materyaller/:ders_id', authMiddleware, async (req, res) => {
     try {
 
         const { ders_id } = req.params;
@@ -169,7 +169,7 @@ router.get('/dersler/materyaller/:ders_id', authMiddleware, async (req, res) => 
 });
 
 // --- 24. CANLI DERS LİNKİ OLUŞTUR / GETİR ---
-router.get('/dersler/canli-ders/:ders_id', authMiddleware, async (req, res) => {
+router.get('/canli-ders/:ders_id', authMiddleware, async (req, res) => {
     try {
         const { ders_id } = req.params;
         const userId = req.user.id;
@@ -222,7 +222,7 @@ router.get('/dersler/canli-ders/:ders_id', authMiddleware, async (req, res) => {
 });
 
 // 26 Ders kaydını veritabanına ekleyen API
-router.post('/dersler/gecmis-yayin/ekle', authMiddleware, async (req, res) => {
+router.post('/gecmis-yayin/ekle', authMiddleware, async (req, res) => {
     const { ders_id, baslik, link } = req.body;
     try {
         const yeniKayit = await pool.query(
@@ -237,7 +237,7 @@ router.post('/dersler/gecmis-yayin/ekle', authMiddleware, async (req, res) => {
 });
 
 // 27 Belirli bir dersin geçmiş yayın kayıtlarını getiren API
-router.get('/dersler/gecmis-yayin/:dersId', authMiddleware, async (req, res) => {
+router.get('/gecmis-yayin/:dersId', authMiddleware, async (req, res) => {
     const { dersId } = req.params;
     try {
         const yayinlar = await pool.query(

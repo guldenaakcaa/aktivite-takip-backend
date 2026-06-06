@@ -41,7 +41,7 @@ router.post('/degerlendirme/kaydet', authMiddleware, async (req, res) => {
 
 
 // 29. Ders Hedeflerini ve Stratejilerini Kaydetme API
-router.post('/planlayici/hedef-ekle', authMiddleware, async (req, res) => {
+router.post('/hedef-ekle', authMiddleware, async (req, res) => {
     const { ders_id, hedef_not, strateji_metni } = req.body;
     const ogrenci_id = req.user.id;
     try {
@@ -61,7 +61,7 @@ router.post('/planlayici/hedef-ekle', authMiddleware, async (req, res) => {
 });
 
 // 30. Ders Stratejisini Kaydetme veya Güncelleme API'si
-router.post('/planlayici/strateji-kaydet', authMiddleware, async (req, res) => {
+router.post('/strateji-kaydet', authMiddleware, async (req, res) => {
     const { ders_id, hedef_not, strateji_metni } = req.body;
     try {
         // Eğer o ders için daha önce strateji girilmişse UPDATE yapar, girilmemişse INSERT yapar (UPSERT mantığı)
@@ -81,7 +81,7 @@ router.post('/planlayici/strateji-kaydet', authMiddleware, async (req, res) => {
 });
 
 // 31. Seçilen Dersin Kayıtlı Stratejisini Getirme API'si
-router.get('/planlayici/strateji-getir/:dersId', authMiddleware, async (req, res) => {
+router.get('/strateji-getir/:dersId', authMiddleware, async (req, res) => {
     const { dersId } = req.params;
     const ogrenci_id = req.user.id;
     try {
@@ -103,7 +103,7 @@ router.get('/planlayici/strateji-getir/:dersId', authMiddleware, async (req, res
 });
 
 // 35. AKILLI KOÇ (YAPAY ZEKA) BAĞLANTISI [4]
-router.post('/planlayici/akilli-koc', authMiddleware, async (req, res) => {
+router.post('/akilli-koc', authMiddleware, async (req, res) => {
     try {
         const { calisma_saati, zorluk, stres, hedef_not, ders_bilgileri } = req.body;
 
