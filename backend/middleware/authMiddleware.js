@@ -7,10 +7,11 @@ const SECRET_KEY = process.env.JWT_SECRET;
 //çekmemin sebebi, kodları internete (örneğin GitHub'a) yüklediğimizde kötü niyetli
 //kişilerin sistemimizin anahtarlarını çalmasını engellemektir.
 
+// JWT Doğrulama 
 const authMiddleware = (req, res, next) => { // req = gelen istek 
-                                           // res = bizim Vereceğimiz Cevap
-                                           //next = bir sonraki aşamaya geçiş izni
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // res = bizim Vereceğimiz Cevap
+    //next = bir sonraki aşamaya geçiş izni
+    const token = req.header('Authorization')?.replace('Bearer ', '');   // token var mı diye bakar
     //Flutter'dan gelen isteğin header kısmına bakıyoruz. Kullanıcı giriş yaptığında
     //Flutter bu başlığa "Authorization: Bearer ds89f7s..." gibi bir bilet koyar.
     //replace('Bearer ', '') kısmı, bileti okumadan önce başındaki "Bearer " (taşıyıcı)
@@ -21,14 +22,17 @@ const authMiddleware = (req, res, next) => { // req = gelen istek
     }
 
     try {
-        const decoded = jwt.verify(token, SECRET_KEY);  //jwt, dışarıdan gelen bileti alır ve bizim 
+        const decoded = jwt.verify(token, SECRET_KEY);  // token varsa sahte mi yoksa bizim anahtaar ile mühürlü mü 
+        //jwt, dışarıdan gelen bileti alır ve bizim 
         // gizli SECRET_KEY mührümüzle basılıp basılmadığını kontrol eder.
         // decoded = bilet doğruysa yazıları okur(id, vb)
         req.user = decoded; //işlem yapan kım onu öğreniriz
-        next();
+        next();  // herşey yolundaysa kişi işlem yapabilir
     } catch (ex) {
         res.status(400).json({ hata: 'Geçersiz token.' });
     }
 };
 
 module.exports = authMiddleware;  // diğer yerlerde kullanmak için dışarıya açıyoruz
+
+
