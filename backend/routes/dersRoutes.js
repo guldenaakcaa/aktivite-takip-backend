@@ -229,6 +229,11 @@ router.get('/canli-ders/:ders_id', authMiddleware, async (req, res) => {
         const odaIsmi = `OgrenciTakip_${ders_id}_${temizDersAdi}_${guvenlikKodu}`;
         const jitsiUrl = `https://meet.jit.si/${odaIsmi}`;
 
+        await pool.query(
+            'UPDATE Dersler SET canli_yayin_aktif = true, jitsi_oda_linki = $1 WHERE ders_id = $2',
+            [jitsiUrl, ders_id]
+        ); // veritabanini güncellemek için
+
         res.json({ url: jitsiUrl, oda_ismi: odaIsmi });
     } catch (err) {
         console.error(err);
