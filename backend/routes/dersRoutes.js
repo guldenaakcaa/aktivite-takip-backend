@@ -102,7 +102,6 @@ router.delete('/sil/:ders_id', authMiddleware, async (req, res) => {
         await pool.query('DELETE FROM OgrenciDers WHERE ders_id = $1', [ders_id]); // Öğrenci kayıtları
         await pool.query('DELETE FROM Molalar WHERE ders_id = $1', [ders_id]);     // Molalar
         await pool.query('DELETE FROM Aktiviteler WHERE ders_id = $1', [ders_id]); // Aktiviteler
-        await pool.query('DELETE FROM SesliNotlar WHERE ders_id = $1', [ders_id]); // Ses kayıtları
 
         // 3. Artık dersi silebiliriz
         await pool.query('DELETE FROM Dersler WHERE ders_id = $1', [ders_id]);
