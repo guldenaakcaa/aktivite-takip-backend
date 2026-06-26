@@ -132,7 +132,7 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
     const ders_id = 101;
 
     const pythonScriptYolu = path.join(__dirname, '..', 'tahmin.py');
-    const pythonKomutu = `python "${pythonScriptYolu}" ${kullanici_id} ${ders_id} ${calisma_saati} ${zorluk} ${stres}`;
+    const pythonKomutu = `python3 "${pythonScriptYolu}" ${kullanici_id} ${ders_id} ${calisma_saati} ${zorluk} ${stres}`;
 
     // DİKKAT: Gemini'yi beklemek için callback fonksiyonunu 'async' yaptık
     exec(pythonKomutu, async (hata, stdout, stderr) => {
@@ -146,7 +146,7 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
 
         try {
             // Gemini modelini ayağa kaldırıyoruz
-            const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
             // Promptumuzu hazırlıyoruz. ML sonucunu Gemini'ye gizli bir ipucu olarak veriyoruz!
             const prompt = `Sen samimi, motive edici ve empati yeteneği yüksek bir yapay zeka eğitim asistanısın. Adın 'Badi'. Senden tavsiye isteyen bir öğrenci var.
