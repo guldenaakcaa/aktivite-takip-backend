@@ -8,7 +8,7 @@ const path = require('path');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 //  25. SEANS DEĞERLENDİRMESİ (Zorluk ve Stres) ---
 router.post('/degerlendirme/kaydet', authMiddleware, async (req, res) => {
