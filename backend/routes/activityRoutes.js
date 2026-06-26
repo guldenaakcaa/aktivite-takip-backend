@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();  // bu işlemleri index.js yığmak yerine düzenli bir şekilde ayırdık
-const pool = require('../db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
+const pool = require('../src/db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
 const authMiddleware = require('../middleware/authMiddleware'); // JWT Middleware'i
 
 

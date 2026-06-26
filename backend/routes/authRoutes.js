@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
+const pool = require('../src/db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
 const bcrypt = require('bcrypt');  // şifre gizleme
 const jwt = require('jsonwebtoken'); // kullanıcı giriş yaptığında token alması için
 const authMiddleware = require('../middleware/authMiddleware'); // JWT Middleware'i
