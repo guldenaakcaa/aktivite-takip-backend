@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
+const pool = require('../src/db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
 const authMiddleware = require('../middleware/authMiddleware');
 
+const { exec } = require('child_process');
+const path = require('path');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 //  25. SEANS DEĞERLENDİRMESİ (Zorluk ve Stres) ---
 router.post('/degerlendirme/kaydet', authMiddleware, async (req, res) => {
@@ -117,6 +121,57 @@ router.post('/akilli-koc', authMiddleware, async (req, res) => {
         console.error(err.message);
         res.status(500).json({ hata: "Yapay zeka asistanına ulaşılamadı." });
     }
+});
+
+router.post('/tavsiye-iste', authMiddleware, (req, res) => {
+    const { calisma_saati, zorluk, stres, ders_adi } = req.body;
+
+    const kullanici_id = req.user.id;
+    const ders_id = 101;
+
+    const pythonScriptYolu = path.join(__dirname, '..', 'tahmin.py');
+    const pythonKomutu = `python "${pythonScriptYolu}" ${kullanici_id} ${ders_id} ${calisma_saati} ${zorluk} ${stres}`;
+
+    // DİKKAT: Gemini'yi beklemek için callback fonksiyonunu 'async' yaptık
+    exec(pythonKomutu, async (hata, stdout, stderr) => {
+        if (hata) {
+            console.error(`Python Hatası: ${hata.message}`);
+            return res.status(500).json({ yapay_zeka_yaniti: "Badi şu an yoğun bir zihinsel karmaşa içinde, birazdan tekrar dene! 🤖" });
+        }
+
+        // ML modelimizden dönen saf matematiksel tahmini alıyoruz (0, 1 veya 2)
+        const ml_tahmini = parseInt(stdout.trim());
+
+        try {
+            // Gemini modelini ayağa kaldırıyoruz
+            const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+            // Promptumuzu hazırlıyoruz. ML sonucunu Gemini'ye gizli bir ipucu olarak veriyoruz!
+            const prompt = `Sen samimi, motive edici ve empati yeteneği yüksek bir yapay zeka eğitim asistanısın. Adın 'Badi'. Senden tavsiye isteyen bir öğrenci var.
+            
+            Öğrencinin anlık durumu:
+            - Çalıştığı Ders: ${ders_adi}
+            - Çalışma Süresi: ${calisma_saati} saat
+            - Zorluk Algısı (1-5): ${zorluk}
+            - Stres Seviyesi (1-5): ${stres}
+            
+            Arka plandaki Yapay Zeka modelimizin performans analizi sonucu: ${ml_tahmini} 
+            (Not: 0 = Zorlanıyor/Riskli, 1 = Ortalama/İyi, 2 = Mükemmel/Zirvede). 
+            
+            Görev: Öğrenciye hitaben, doğrudan sen ('Badi') konuşuyormuşsun gibi kısa, cesaretlendirici ve bu duruma (özellikle ML analiz sonucuna ve stres/zorluk seviyelerine) uygun doğal bir geri bildirim mesajı yaz. Robotik olma, çok uzun yazma (maksimum 3-4 cümle) ve emojiler kullan.`;
+
+            // Gemini'den yanıtı alıyoruz
+            const result = await geminiModel.generateContent(prompt);
+            const badiTavsiyesi = result.response.text();
+
+            // Doğal dille oluşturulmuş bu harika yanıtı Flutter'a yolluyoruz
+            res.status(200).json({ yapay_zeka_yaniti: badiTavsiyesi });
+
+        } catch (geminiHata) {
+            console.error(`Gemini Hatası: ${geminiHata.message}`);
+            res.status(500).json({ yapay_zeka_yaniti: "Badi şu an kelimeleri toparlayamıyor, ama senin yanındayım! 🪄" });
+        }
+    });
 });
 
 module.exports = router;

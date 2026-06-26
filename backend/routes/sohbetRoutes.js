@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
+const pool = require('../src/db');  // veritabnına bağlanan poolu dosyaya çekiyoruz
 const authMiddleware = require('../middleware/authMiddleware');
 
 // 13. SOHBET MESAJI GÖNDERME
