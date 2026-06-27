@@ -314,4 +314,22 @@ router.get('/program-getir', authMiddleware, async (req, res) => {
         res.status(500).json({ hata: "Program getirilemedi." });
     }
 });
+
+// --- 38. MANUEL PROGRAM EKLEME ---
+router.post('/program-manuel-ekle', authMiddleware, async (req, res) => {
+    const { ders_id, gun, baslangic_saati, bitis_saati, gorev_tanimi } = req.body;
+    const ogrenci_id = req.user.id;
+
+    try {
+        const sonuc = await pool.query(
+            `INSERT INTO haftalik_program (ogrenci_id, ders_id, gun, baslangic_saati, bitis_saati, gorev_tanimi)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [ogrenci_id, ders_id, gun, baslangic_saati, bitis_saati, gorev_tanimi]
+        );
+        res.status(201).json({ mesaj: "Görev başarıyla eklendi.", gorev: sonuc.rows[0] });
+    } catch (err) {
+        console.error("Manuel program ekleme hatası:", err.message);
+        res.status(500).json({ hata: "Görev eklenemedi." });
+    }
+});
 module.exports = router;
