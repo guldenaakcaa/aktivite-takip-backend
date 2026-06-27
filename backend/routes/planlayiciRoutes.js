@@ -176,4 +176,31 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
     });
 });
 
+// NORMAL SOHBET İÇİN YENİ API ROTASI
+router.post('/sohbet', authMiddleware, async (req, res) => {
+    const { mesaj } = req.body;
+
+    try {
+        // Gemini 2.5 Flash modelini kullanıyoruz
+        const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        // Badi'ye kim olduğunu ve nasıl davranması gerektiğini söylüyoruz
+        const prompt = `Sen samimi, motive edici ve öğrenci dostu bir yapay zeka eğitim asistanısın. Adın 'Badi'. Asla yapay zeka olduğunu belli etme, sanki yakın bir arkadaşmışsın gibi konuş. 
+        Öğrenci sana şu mesajı gönderdi: "${mesaj}"
+        
+        Görev: Öğrenciye yardımcı ol, sorusunu mantıklı bir şekilde cevapla ve doğal bir sohbet et. Çok uzun destanlar yazma, net ve anlaşılır ol. Emojiler kullan.`;
+
+        const result = await geminiModel.generateContent(prompt);
+        const badiCevabi = result.response.text();
+
+        // Gemini'den gelen cevabı Flutter'a yolluyoruz
+        res.status(200).json({ cevap: badiCevabi });
+
+    } catch (hata) {
+        console.error(`Sohbet Hatası: ${hata.message}`);
+        res.status(500).json({ cevap: "Şu an kafam biraz dolu, sorunu tam anlayamadım. Bir daha sorar mısın? 🤖" });
+    }
+});
+
+
 module.exports = router;
