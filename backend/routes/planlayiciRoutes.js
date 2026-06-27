@@ -133,6 +133,17 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
     const kullanici_id = req.user.id;
     const ders_id = 101;
 
+    let sureMetni = "";
+    let saat = parseFloat(calisma_saati) || 0;
+
+    if (saat <= 0.02) { // Yaklaşık 1 dakikadan az ise
+        sureMetni = "sadece birkaç saniye";
+    } else if (saat < 1) { // 1 saatten az ise dakikaya çevir
+        sureMetni = `${Math.round(saat * 60)} dakika`;
+    } else {
+        sureMetni = `${saat.toFixed(1)} saat`;
+    }
+
     const pythonScriptYolu = path.join(__dirname, '..', 'tahmin.py');
     const pythonKomutu = `python3 "${pythonScriptYolu}" ${kullanici_id} ${ders_id} ${calisma_saati} ${zorluk} ${stres}`;
 
@@ -140,7 +151,7 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
     exec(pythonKomutu, async (hata, stdout, stderr) => {
         if (hata) {
             console.error(`Python Hatası: ${hata.message}`);
-            return res.status(500).json({ yapay_zeka_yaniti: "Badi şu an yoğun bir zihinsel karmaşa içinde, birazdan tekrar dene! 🤖" });
+            return res.status(200).json({ yapay_zeka_yaniti: "Şu an arka planda ufak bir yoğunluk var, verilerini tam analiz edemedim ama sen çalışmaya tam gaz devam et! 🤖" });
         }
 
         // ML modelimizden dönen saf matematiksel tahmini alıyoruz (0, 1 veya 2)
@@ -155,14 +166,19 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
             
             Öğrencinin anlık durumu:
             - Çalıştığı Ders: ${ders_adi}
-            - Çalışma Süresi: ${calisma_saati} saat
+            - Çalışma Süresi: ${sureMetni}
             - Zorluk Algısı (1-5): ${zorluk}
             - Stres Seviyesi (1-5): ${stres}
             
             Arka plandaki Yapay Zeka modelimizin performans analizi sonucu: ${ml_tahmini} 
             (Not: 0 = Zorlanıyor/Riskli, 1 = Ortalama/İyi, 2 = Mükemmel/Zirvede). 
             
-            Görev: Öğrenciye hitaben, doğrudan sen ('Badi') konuşuyormuşsun gibi kısa, cesaretlendirici ve bu duruma (özellikle ML analiz sonucuna ve stres/zorluk seviyelerine) uygun doğal bir geri bildirim mesajı yaz. Robotik olma, çok uzun yazma (maksimum 3-4 cümle) ve emojiler kullan.`;
+            Görev: Öğrenciye hitaben, doğrudan sen ('Badi') konuşuyormuşsun gibi kısa, cesaretlendirici ve bu duruma uygun doğal bir geri bildirim mesajı yaz. 
+            
+            ÇOK ÖNEMLİ KURALLAR:
+            1. Öğrencinin çalışma süresi "${sureMetni}". ASLA 1 saat veya farklı uydurma bir süre belirtme!
+            2. Eğer süre "sadece birkaç saniye" ise, "Daha yeni başladın, dikkatini toplayıp tekrar deneyebilirsin" minvalinde gerçekçi bir tavsiye ver.
+            3. Robotik olma, maksimum 3-4 cümle yaz ve emoji kullan.`;
 
             // Gemini'den yanıtı alıyoruz
             const result = await geminiModel.generateContent(prompt);
@@ -173,7 +189,7 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
 
         } catch (geminiHata) {
             console.error(`Gemini Hatası: ${geminiHata.message}`);
-            res.status(500).json({ yapay_zeka_yaniti: "Badi şu an kelimeleri toparlayamıyor, ama senin yanındayım! 🪄" });
+            res.status(200).json({ yapay_zeka_yaniti: "Şu an kelimeleri toparlayamıyorum (bağlantım yoğun) ama senin yanındayım, pes etme! 🪄" });
         }
     });
 });
