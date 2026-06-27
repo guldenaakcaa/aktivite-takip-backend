@@ -69,6 +69,7 @@ router.post('/hedef-ekle', authMiddleware, async (req, res) => {
 // 30. Ders Stratejisini Kaydetme veya Güncelleme API'si
 router.post('/strateji-kaydet', authMiddleware, async (req, res) => {
     const { ders_id, hedef_not, strateji_metni } = req.body;
+    const ogrenci_id = req.user.id;
     try {
         // Eğer o ders için daha önce strateji girilmişse UPDATE yapar, girilmemişse INSERT yapar (UPSERT mantığı)
         const sonuc = await pool.query(`
