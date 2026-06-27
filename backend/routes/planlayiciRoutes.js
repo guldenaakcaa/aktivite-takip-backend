@@ -176,19 +176,37 @@ router.post('/tavsiye-iste', authMiddleware, (req, res) => {
     });
 });
 
-// NORMAL SOHBET İÇİN YENİ API ROTASI
+// HAFIZALI SOHBET İÇİN YENİ API ROTASI
 router.post('/sohbet', authMiddleware, async (req, res) => {
     const { mesaj } = req.body;
+    const ogrenci_id = req.user.id;
 
     try {
-        // Gemini 2.5 Flash modelini kullanıyoruz
+        // 1. Önce veritabanına gidip öğrencinin girdiği tüm stratejileri gizlice çekiyoruz
+        const hedefler = await pool.query(
+            'SELECT hedef_not, strateji_metni FROM OgrenciHedefleri WHERE ogrenci_id = $1 AND strateji_metni IS NOT NULL',
+            [ogrenci_id]
+        );
+
+        // 2. Bu stratejileri Badi'nin okuyabileceği bir metne dönüştürüyoruz
+        let ogrenciStratejisi = "";
+        if (hedefler.rows.length > 0) {
+            ogrenciStratejisi = "\nÖğrencinin Dersleri İçin Belirlediği Geçme Stratejileri ve Hedefleri Şunlar:\n";
+            hedefler.rows.forEach((hedef, index) => {
+                ogrenciStratejisi += `- Hedef Notu: ${hedef.hedef_not}, Stratejisi: "${hedef.strateji_metni}"\n`;
+            });
+        }
+
+        // 3. Gemini 2.5 Flash modelini kullanıyoruz
         const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-        // Badi'ye kim olduğunu ve nasıl davranması gerektiğini söylüyoruz
+        // 4. Badi'ye hem kim olduğunu hem de öğrencinin stratejilerini söylüyoruz!
         const prompt = `Sen samimi, motive edici ve öğrenci dostu bir yapay zeka eğitim asistanısın. Adın 'Badi'. Asla yapay zeka olduğunu belli etme, sanki yakın bir arkadaşmışsın gibi konuş. 
+        ${ogrenciStratejisi}
+        
         Öğrenci sana şu mesajı gönderdi: "${mesaj}"
         
-        Görev: Öğrenciye yardımcı ol, sorusunu mantıklı bir şekilde cevapla ve doğal bir sohbet et. Çok uzun destanlar yazma, net ve anlaşılır ol. Emojiler kullan.`;
+        Görev: Öğrenciye yardımcı ol. Eğer sorusu veya durumu belirlediği hedeflerle/stratejilerle ilgiliyse, ona kendi cümlelerini hatırlatarak motive et (Örn: "Hani dönem başında ... yapacağım demiştin, şimdi tam zamanı!"). Çok uzun destanlar yazma, net ve anlaşılır ol. Emojiler kullan.`;
 
         const result = await geminiModel.generateContent(prompt);
         const badiCevabi = result.response.text();
@@ -198,7 +216,7 @@ router.post('/sohbet', authMiddleware, async (req, res) => {
 
     } catch (hata) {
         console.error(`Sohbet Hatası: ${hata.message}`);
-        res.status(500).json({ cevap: "Şu an kafam biraz dolu, sorunu tam anlayamadım. Bir daha sorar mısın? 🤖" });
+        res.status(500).json({ cevap: "Şu an hafızamı toparlayamıyorum, sorunu tam anlayamadım. Bir daha sorar mısın? 🤖" });
     }
 });
 
