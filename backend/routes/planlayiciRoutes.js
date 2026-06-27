@@ -221,5 +221,97 @@ router.post('/sohbet', authMiddleware, async (req, res) => {
     }
 });
 
+// --- 36. YAPAY ZEKA OTONOM HAFTALIK PROGRAM OLUŞTURUCU ---
+router.post('/program-olustur', authMiddleware, async (req, res) => {
+    const { ders_id, zorluk, stres } = req.body;
+    const ogrenci_id = req.user.id;
 
+    try {
+        // 1. Öğrencinin hedefini ve stratejisini bulalım (Badi için ekstra bağlam)
+        const hedefSecimi = await pool.query(
+            'SELECT hedef_not, strateji_metni FROM OgrenciHedefleri WHERE ogrenci_id = $1 AND ders_id = $2',
+            [ogrenci_id, ders_id]
+        );
+
+        let ekstraBilgi = "";
+        if (hedefSecimi.rows.length > 0) {
+            ekstraBilgi = `Öğrencinin hedefi: ${hedefSecimi.rows[0].hedef_not}. Stratejisi: "${hedefSecimi.rows[0].strateji_metni}".`;
+        }
+
+        // 2. Gemini modelini çağır
+        const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        // DİKKAT: Yapay zekaya kesin bir JSON formatı dayatıyoruz.
+        const prompt = `Sen empatik ve analitik bir eğitim asistanısın. Öğrenci belirlediği ders için haftalık bir çalışma programı istiyor.
+        Öğrencinin bildirdiği zorluk seviyesi: ${zorluk}/5
+        Öğrencinin bildirdiği stres seviyesi: ${stres}/5
+        ${ekstraBilgi}
+        
+        Görev: Öğrencinin stres ve zorluk seviyesine uygun, haftada 3 günlük (örneğin Pazartesi, Çarşamba, Cuma) kısa çalışma periyotları oluştur. Stres 3'ten yüksekse görevleri çok daha hafif tut ve molaları vurgula.
+        
+        ÇIKTI KESİNLİKLE VE SADECE JSON FORMATINDA OLMALIDIR. Başka hiçbir açıklama, selamlama veya markdown (vurgu, kod bloğu vb.) ekleme. Sadece şu formatta bir dizi (array) döndür:
+        [
+          {
+            "gun": "Pazartesi",
+            "baslangic_saati": "14:00",
+            "bitis_saati": "14:45",
+            "gorev_tanimi": "Konu Tekrarı ve Özet Çıkarma"
+          }
+        ]`;
+
+        const result = await geminiModel.generateContent(prompt);
+        let aiCevap = result.response.text();
+
+        // Güvenlik: Gemini cevapta kod bloğu markdown'u (```json) kullanırsa onu temizliyoruz
+        aiCevap = aiCevap.replace(/```json/g, "").replace(/```/g, "").trim();
+
+        // JSON metnini Javascript Objesine çevir
+        const programDizisi = JSON.parse(aiCevap);
+
+        // 3. Üretilen her bir günü veritabanındaki "haftalik_program" tablosuna kaydet
+        for (let i = 0; i < programDizisi.length; i++) {
+            const p = programDizisi[i];
+            await pool.query(
+                `INSERT INTO haftalik_program (ogrenci_id, ders_id, gun, baslangic_saati, bitis_saati, gorev_tanimi)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [ogrenci_id, ders_id, p.gun, p.baslangic_saati, p.bitis_saati, p.gorev_tanimi]
+            );
+        }
+
+        res.status(200).json({ mesaj: "Program başarıyla oluşturuldu ve veritabanına işlendi.", program: programDizisi });
+
+    } catch (err) {
+        console.error("Program oluşturma hatası:", err.message);
+        res.status(500).json({ hata: "Yapay zeka programı oluşturamadı, lütfen tekrar dene." });
+    }
+});
+
+// --- 37. KAYITLI PROGRAMI GETİR (Flutter'da Göstermek İçin) ---
+router.get('/program-getir', authMiddleware, async (req, res) => {
+    const ogrenci_id = req.user.id;
+    // Eğer belirli bir derse ait isteniyorsa (dersId varsa), yoksa tümünü getir.
+    const ders_id = req.query.ders_id;
+
+    try {
+        let sql = `SELECT hp.*, d.ders_adi 
+                   FROM haftalik_program hp 
+                   LEFT JOIN dersler d ON hp.ders_id = d.ders_id 
+                   WHERE hp.ogrenci_id = $1`;
+        let params = [ogrenci_id];
+
+        if (ders_id && ders_id !== '0') {
+            sql += ` AND hp.ders_id = $2`;
+            params.push(ders_id);
+        }
+
+        // Programı eklenme sırasına veya günlere göre sırala
+        sql += ` ORDER BY hp.eklenme_tarihi ASC`;
+
+        const program = await pool.query(sql, params);
+        res.status(200).json(program.rows);
+    } catch (err) {
+        console.error("Program getirme hatası:", err.message);
+        res.status(500).json({ hata: "Program getirilemedi." });
+    }
+});
 module.exports = router;
