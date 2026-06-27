@@ -72,13 +72,14 @@ router.post('/strateji-kaydet', authMiddleware, async (req, res) => {
     const ogrenci_id = req.user.id;
     try {
         // Eğer o ders için daha önce strateji girilmişse UPDATE yapar, girilmemişse INSERT yapar (UPSERT mantığı)
+
         const sonuc = await pool.query(`
-            INSERT INTO OgrenciHedefleri (ders_id, hedef_not, strateji_metni)
-            VALUES ($1, $2, $3)
-            ON CONFLICT (ders_id) 
-            DO UPDATE SET hedef_not = $2, strateji_metni = $3 
+            INSERT INTO OgrenciHedefleri (ogrenci_id, ders_id, hedef_not, strateji_metni)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (ogrenci_id, ders_id) 
+            DO UPDATE SET hedef_not = $3, strateji_metni = $4 
             RETURNING *`,
-            [ders_id, hedef_not, strateji_metni]
+            [ogrenci_id, ders_id, hedef_not, strateji_metni]
         );
         res.status(201).json({ mesaj: "Strateji başarıyla kaydedildi", veri: sonuc.rows[0] });
     } catch (err) {
