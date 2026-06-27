@@ -332,4 +332,22 @@ router.post('/program-manuel-ekle', authMiddleware, async (req, res) => {
         res.status(500).json({ hata: "Görev eklenemedi." });
     }
 });
+
+// --- 39. GÖREV DURUMU GÜNCELLEME (Tamamlandı/Bekliyor) ---
+router.put('/program-durum-guncelle/:id', authMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const { durum } = req.body; // İstemciden 'tamamlandi' veya 'bekliyor' gelecek
+    const ogrenci_id = req.user.id;
+
+    try {
+        await pool.query(
+            `UPDATE haftalik_program SET durum = $1 WHERE program_id = $2 AND ogrenci_id = $3`,
+            [durum, id, ogrenci_id]
+        );
+        res.status(200).json({ mesaj: "Görev durumu başarıyla güncellendi." });
+    } catch (err) {
+        console.error("Görev güncellenirken hata:", err.message);
+        res.status(500).json({ hata: "Görev güncellenemedi." });
+    }
+});
 module.exports = router;
